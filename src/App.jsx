@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
@@ -5,12 +6,16 @@ import Register from "./pages/Register";
 
 import PatientDashboard from "./pages/PatientDashboard";
 import DoctorDashboard from "./pages/DoctorDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 
 import AIAssistant from "./pages/AIAssistant";
 import FindDoctor from "./pages/FindDoctor";
 import Appointments from "./pages/Appointments";
 import HealthRecords from "./pages/HealthRecords";
 import Profile from "./pages/Profile";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import AdminDoctors from "./pages/AdminDoctors";
 
 function App() {
   return (
@@ -32,10 +37,19 @@ function App() {
           element={<Register />}
         />
 
-        {/* PATIENT */}
         <Route
           path="/patient-dashboard"
           element={<PatientDashboard />}
+        />
+
+        <Route
+          path="/doctor-dashboard"
+          element={<DoctorDashboard />}
+        />
+
+        <Route
+          path="/admin-dashboard"
+          element={<AdminDashboard />}
         />
 
         <Route
@@ -63,10 +77,18 @@ function App() {
           element={<Profile />}
         />
 
-        {/* DOCTOR */}
         <Route
-          path="/doctor-dashboard"
-          element={<DoctorDashboard />}
+          path="/forgot-password"
+          element={<ForgotPassword />}
+        />
+        <Route
+  path="/admin/doctors"
+  element={<AdminDoctors />}
+/>
+
+        <Route
+          path="/reset-password/:token"
+          element={<ResetPassword />}
         />
 
       </Routes>
@@ -75,3 +97,4 @@ function App() {
 }
 
 export default App;
+

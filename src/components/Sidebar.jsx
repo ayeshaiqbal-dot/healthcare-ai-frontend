@@ -24,13 +24,12 @@ function Sidebar() {
       <h2>HealthCare AI</h2>
 
       <nav>
-        <p
-          onClick={() => navigate("/dashboard")}
-          style={navStyle}
-        >
-          Dashboard
-        </p>
-
+       <p 
+  onClick={() => navigate("/patient-dashboard")} 
+  style={navStyle} 
+>
+  Dashboard 
+</p>
         <p
           onClick={() => navigate("/ai-assistant")}
           style={navStyle}
@@ -49,7 +48,7 @@ function Sidebar() {
           onClick={() => navigate("/appointments")}
           style={navStyle}
         >
-          Appointments
+          My Appointments
         </p>
 
         <p

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 function HealthRecords() {
+  const [image, setImage] = useState(null);
   const [records, setRecords] = useState([]);
 
   const [title, setTitle] = useState("");
@@ -57,21 +58,27 @@ function HealthRecords() {
     setLoading(true);
 
     try {
+      // FormData is required for image upload
+      const formData = new FormData();
+
+      formData.append("title", title);
+      formData.append("type", type);
+      formData.append("description", description);
+      formData.append("doctor", doctor);
+      formData.append("date", date);
+
+      if (image) {
+        formData.append("image", image);
+      }
+
       const response = await fetch(
         "http://localhost:5000/api/health-records",
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            title,
-            type,
-            description,
-            doctor,
-            date,
-          }),
+          body: formData,
         }
       );
 
@@ -85,12 +92,15 @@ function HealthRecords() {
 
       setMessage("Health record added successfully! ✅");
 
+      // Clear form
       setTitle("");
       setType("Medical Report");
       setDescription("");
       setDoctor("");
       setDate("");
+      setImage(null);
 
+      // Refresh records
       await fetchRecords();
     } catch (error) {
       console.error(error);
@@ -192,6 +202,8 @@ function HealthRecords() {
         <h2>Add Health Record</h2>
 
         <form onSubmit={handleSubmit}>
+          {/* TITLE */}
+
           <label>Record Title</label>
 
           <input
@@ -202,6 +214,8 @@ function HealthRecords() {
             required
             style={inputStyle}
           />
+
+          {/* TYPE */}
 
           <label>Record Type</label>
 
@@ -217,6 +231,8 @@ function HealthRecords() {
             <option>Other</option>
           </select>
 
+          {/* DESCRIPTION */}
+
           <label>Description</label>
 
           <textarea
@@ -229,6 +245,8 @@ function HealthRecords() {
             style={inputStyle}
           />
 
+          {/* DOCTOR */}
+
           <label>Doctor</label>
 
           <input
@@ -239,6 +257,8 @@ function HealthRecords() {
             style={inputStyle}
           />
 
+          {/* DATE */}
+
           <label>Date</label>
 
           <input
@@ -248,6 +268,35 @@ function HealthRecords() {
             required
             style={inputStyle}
           />
+
+          {/* IMAGE UPLOAD */}
+
+          <label>Upload Medical Picture</label>
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) =>
+              setImage(e.target.files[0])
+            }
+            style={inputStyle}
+          />
+
+          {/* SHOW SELECTED IMAGE NAME */}
+
+          {image && (
+            <p
+              style={{
+                marginTop: "-8px",
+                marginBottom: "15px",
+                color: "#555",
+              }}
+            >
+              Selected file: <strong>{image.name}</strong>
+            </p>
+          )}
+
+          {/* SUBMIT */}
 
           <button
             type="submit"
@@ -312,6 +361,25 @@ function HealthRecords() {
                   <strong>Description:</strong>{" "}
                   {record.description || "None"}
                 </p>
+
+                {/* SHOW UPLOADED IMAGE */}
+
+                {record.image && (
+                  <img
+                    src={`http://localhost:5000${record.image}`}
+                    alt={record.title}
+                    style={{
+                      width: "100%",
+                      maxHeight: "250px",
+                      objectFit: "cover",
+                      borderRadius: "10px",
+                      marginTop: "10px",
+                      marginBottom: "15px",
+                    }}
+                  />
+                )}
+
+                {/* DELETE */}
 
                 <button
                   onClick={() =>

@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 function Header() {
+  const navigate = useNavigate();
+
   return (
     <header
       style={{
@@ -41,6 +45,7 @@ function Header() {
       >
         {/* Notification */}
         <button
+          onClick={() => alert("No new notifications")}
           style={{
             padding: "10px 14px",
             border: "1px solid #e5e7eb",
@@ -54,6 +59,7 @@ function Header() {
 
         {/* Profile */}
         <button
+          onClick={() => navigate("/profile")}
           style={{
             padding: "10px 16px",
             border: "1px solid #e5e7eb",

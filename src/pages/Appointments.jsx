@@ -154,7 +154,7 @@ function Appointments() {
         minHeight: "100vh",
       }}
     >
-      <h1>Appointments 📅</h1>
+     <h1>My Appointments </h1>
 
       <p style={{ color: "#666" }}>
         Book and manage your doctor appointments.

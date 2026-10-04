@@ -1,14 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    role: "patient",
   });
 
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -20,98 +24,170 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setMessage("");
+    setError("");
+    setLoading(true);
+
     try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "http://localhost:5000/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...formData,
+            role: "patient",
+          }),
+        }
+      );
 
       const data = await response.json();
 
-      if (response.ok) {
-        setMessage("Registration successful!");
-        console.log(data);
-      } else {
-        setMessage(data.message);
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed");
       }
+
+      setMessage("Patient account created successfully! ✅");
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
     } catch (error) {
       console.error(error);
-      setMessage("Could not connect to server.");
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h1>Create Account</h1>
+    <div style={pageStyle}>
+      <div style={cardStyle}>
+        <h1>Create Account</h1>
 
-      <form onSubmit={handleSubmit}>
-        <div>
+        <p style={{ color: "#666" }}>
+          Create your patient account.
+        </p>
+
+        {message && (
+          <div style={successStyle}>{message}</div>
+        )}
+
+        {error && (
+          <div style={errorStyle}>{error}</div>
+        )}
+
+        <form onSubmit={handleSubmit}>
           <label>Name</label>
-          <br />
+
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
             placeholder="Enter your name"
+            required
+            style={inputStyle}
           />
-        </div>
 
-        <br />
-
-        <div>
           <label>Email</label>
-          <br />
+
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
             placeholder="Enter your email"
+            required
+            style={inputStyle}
           />
-        </div>
 
-        <br />
-
-        <div>
           <label>Password</label>
-          <br />
+
           <input
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
             placeholder="Enter your password"
+            required
+            style={inputStyle}
           />
-        </div>
 
-        <br />
-
-        <div>
-          <label>Role</label>
-          <br />
-
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
+          <div
+            style={{
+              backgroundColor: "#eff6ff",
+              padding: "12px",
+              borderRadius: "8px",
+              marginBottom: "15px",
+            }}
           >
-            <option value="patient">Patient</option>
-            <option value="doctor">Doctor</option>
-          </select>
-        </div>
+            Account type: <strong>Patient</strong>
+          </div>
 
-        <br />
-
-        <button type="submit">Create Account</button>
-      </form>
-
-      {message && <p>{message}</p>}
+          <button
+            type="submit"
+            disabled={loading}
+            style={buttonStyle}
+          >
+            {loading ? "Creating..." : "Create Account"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
+
+const pageStyle = {
+  minHeight: "100vh",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  backgroundColor: "#f5f7fa",
+};
+
+const cardStyle = {
+  width: "420px",
+  backgroundColor: "white",
+  padding: "30px",
+  borderRadius: "14px",
+  border: "1px solid #ddd",
+};
+
+const inputStyle = {
+  width: "100%",
+  padding: "12px",
+  marginTop: "8px",
+  marginBottom: "18px",
+  boxSizing: "border-box",
+  border: "1px solid #ccc",
+  borderRadius: "8px",
+};
+
+const buttonStyle = {
+  width: "100%",
+  padding: "12px",
+  border: "none",
+  borderRadius: "8px",
+  fontWeight: "bold",
+  cursor: "pointer",
+};
+
+const successStyle = {
+  padding: "12px",
+  marginBottom: "15px",
+  backgroundColor: "#dcfce7",
+  borderRadius: "8px",
+};
+
+const errorStyle = {
+  padding: "12px",
+  marginBottom: "15px",
+  backgroundColor: "#fee2e2",
+  color: "#b91c1c",
+  borderRadius: "8px",
+};
 
 export default Register;

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +10,7 @@ function Login() {
     password: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -43,21 +45,18 @@ function Login() {
 
       if (!response.ok) {
         setMessage(data.message || "Login failed.");
-        setLoading(false);
+        return;
+      }
+
+      if (!data.token) {
+        setMessage("Login succeeded but no token was received.");
         return;
       }
 
       // Save JWT token
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-      } else {
-        console.error("No token received from backend.");
-        setMessage("Login succeeded but no token was received.");
-        setLoading(false);
-        return;
-      }
+      localStorage.setItem("token", data.token);
 
-      // Save user
+      // Save user information
       if (data.user) {
         localStorage.setItem(
           "user",
@@ -65,15 +64,20 @@ function Login() {
         );
       }
 
-      setMessage("Login successful! ✅");
+      setMessage("Login successful!");
 
-      // Redirect according to role
+      // ==========================================
+      // ROLE-BASED REDIRECTION
+      // ==========================================
+
       if (data.user?.role === "patient") {
         navigate("/patient-dashboard");
       } else if (data.user?.role === "doctor") {
         navigate("/doctor-dashboard");
+      } else if (data.user?.role === "admin") {
+        navigate("/admin-dashboard");
       } else {
-        navigate("/");
+        setMessage("Unknown user role.");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -86,15 +90,40 @@ function Login() {
   return (
     <div
       style={{
-        maxWidth: "400px",
-        margin: "50px auto",
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#f5f7fa",
         padding: "30px",
       }}
     >
-      <h1>Login</h1>
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "450px",
+          backgroundColor: "#fff",
+          padding: "40px",
+          borderRadius: "14px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+        }}
+      >
+        <h1 style={{ textAlign: "center" }}>
+          Login
+        </h1>
 
-      <form onSubmit={handleSubmit}>
-        <div>
+        <p
+          style={{
+            textAlign: "center",
+            color: "#6b7280",
+          }}
+        >
+          Welcome back! Please sign in to your account.
+        </p>
+
+        <form onSubmit={handleSubmit}>
+          {/* EMAIL */}
+
           <label>Email</label>
 
           <input
@@ -106,46 +135,134 @@ function Login() {
             required
             style={inputStyle}
           />
-        </div>
 
-        <div>
+          {/* PASSWORD */}
+
           <label>Password</label>
 
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter your password"
-            required
-            style={inputStyle}
-          />
-        </div>
+          <div
+            style={{
+              position: "relative",
+              marginTop: "8px",
+              marginBottom: "20px",
+            }}
+          >
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              required
+              style={{
+                ...inputStyle,
+                marginTop: "0",
+                marginBottom: "0",
+                paddingRight: "45px",
+              }}
+            />
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: "100%",
-            padding: "12px",
-            marginTop: "10px",
-            cursor: "pointer",
-          }}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+            <button
+              type="button"
+              onClick={() =>
+                setShowPassword(!showPassword)
+              }
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                fontSize: "18px",
+                padding: "5px",
+              }}
+              aria-label={
+                showPassword
+                  ? "Hide password"
+                  : "Show password"
+              }
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </button>
+          </div>
 
-      {message && (
+          {/* FORGOT PASSWORD */}
+
+          <div
+            style={{
+              textAlign: "right",
+              marginBottom: "20px",
+            }}
+          >
+            <span
+              onClick={() => navigate("/forgot-password")}
+              style={{
+                color: "#2563eb",
+                cursor: "pointer",
+              }}
+            >
+              Forgot your password?
+            </span>
+          </div>
+
+          {/* LOGIN BUTTON */}
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "13px",
+              border: "none",
+              borderRadius: "8px",
+              backgroundColor: "#2563eb",
+              color: "white",
+              fontSize: "16px",
+              cursor: loading
+                ? "not-allowed"
+                : "pointer",
+            }}
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+
+        {/* MESSAGE */}
+
+        {message && (
+          <p
+            style={{
+              textAlign: "center",
+              marginTop: "15px",
+            }}
+          >
+            {message}
+          </p>
+        )}
+
+        {/* REGISTER */}
+
         <p
           style={{
-            marginTop: "20px",
-            fontWeight: "bold",
+            textAlign: "center",
+            marginTop: "25px",
           }}
         >
-          {message}
+          New user?{" "}
+          <span
+            onClick={() => navigate("/register")}
+            style={{
+              color: "#2563eb",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            Register
+          </span>
         </p>
-      )}
+      </div>
     </div>
   );
 }
@@ -157,6 +274,9 @@ const inputStyle = {
   marginTop: "8px",
   marginBottom: "20px",
   boxSizing: "border-box",
+  border: "1px solid #ccc",
+  borderRadius: "8px",
 };
 
 export default Login;
+
